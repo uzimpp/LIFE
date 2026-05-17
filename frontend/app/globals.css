@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/* ── Color tokens ──────────────────────────────────────────────── */
+@theme {
+  --color-bg: #f2ead3;
+  --color-surface: #fefcf6;
+  --color-surface-deep: #d9ccaf;
+  --color-fg: #1a1814;
+  --color-muted: #6e6558;
+  --color-border: #bfb398;
+  --color-sage-green: #315d34;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #141210;
+    --color-surface: #211e1a;
+    --color-surface-deep: #0d0b09;
+    --color-fg: #f2ead3;
+    --color-muted: #8a7e6e;
+    --color-border: #342e27;
+    --color-sage-green: #315d34;
+  }
+}
+
+/* ── Font wiring ───────────────────────────────────────────────── */
+@theme inline {
+  --font-sans: var(--font-sans);
+  --font-title: var(--font-title);
+}
+
+/* ── Type scale — editorial, Awwwards-grade contrast ──────────── */
+@theme {
+  --text-xs: 0.6875rem; /* 11px  — eyebrows, labels, metadata */
+  --text-sm: 0.875rem; /* 14px  — captions, fine print */
+  --text-base: 1.0625rem; /* 17px  — body copy */
+  --text-md: 1.3125rem; /* 21px  — lead paragraphs */
+  --text-lg: 1.75rem; /* 28px  — subsection headings */
+  --text-xl: 2.25rem; /* 36px  — section headings */
+  --text-2xl: 3rem; /* 48px  — card headings */
+  --text-3xl: 4rem; /* 64px  — wizard questions */
+  --text-4xl: 5.25rem; /* 84px  — page titles (mobile) */
+  --text-5xl: 6.875rem; /* 110px — page titles (desktop) */
+  --text-6xl: 9rem; /* 144px — landing hero */
+  --text-7xl: 11.75rem; /* 188px — editorial display accent */
+  --text-8xl: 15.5rem; /* 248px — maximum display (decorative) */
+}
+
+/* ── Marquee keyframe ──────────────────────────────────────────── */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 36s linear infinite;
+}
+.animate-marquee-slow {
+  animation: marquee 56s linear infinite;
+}
+
+/* ── Base ──────────────────────────────────────────────────────── */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-fg);
+  font-family:
+    var(--font-sans),
+    system-ui,
+    -apple-system,
+    sans-serif;
+}
+
+/* Section headings — editorial but still readable */
+.title {
+  font-family: var(--font-title), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  line-height: 0.96;
+}
+
+/* Display / hero sizes — Awwwards-grade compression */
+.title-tight {
+  font-family: var(--font-title), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 0.88;
+  padding-bottom: 2rem;
+}
+
+/* ── Reusable display + headline type ──────────────────────────────
+   Self-contained typography utilities (font, weight, letter-spacing,
+   line-height, font-size). Apply a color utility (text-fg etc.) alongside. */
+
+/* Hero display — the LIFE-word scale.
+   Linear fluid: locked to 6rem at <=375px viewport, locked to 16rem at >=1440px.
+   Derived from solving size = base + slope*vw for both breakpoints.
+   line-height MUST stay > 0 — the LifeWord component has overflow-hidden
+   per-char wrappers that inherit this value as their clip-box height. */
+.text-display {
+  font-family: var(--font-title), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  font-size: clamp(4.6rem, calc(0.59rem + 17.13vw), 16rem);
+}
+
+/* Section headlines — "Unsure about" / "Figured out at" / page titles.
+   Same breakpoints as .text-display: pinned at 0.5rem <=375px, 5.5rem >=1440px. */
+.text-headline {
+  font-family: var(--font-title), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  font-size: clamp(1.9rem, calc(0.63rem + 5.41vw), 5.5rem);
+}
+
+/* Feature display — between .text-headline and .text-display.
+   Use for section-anchor headings like "Built on Designing Your Life".
+   Pinned: 2.3rem @ 375px viewport, 10rem @ 1440px viewport. */
+.text-feature {
+  font-family: var(--font-title), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+  font-size: clamp(2.3rem, calc(11.57vw - 0.41rem), 10rem);
+}
