@@ -32,6 +32,16 @@ func (r *fakeSnapshotRepo) GetLatest(_ context.Context, userID uuid.UUID) (*enti
 	return nil, nil
 }
 
+func (r *fakeSnapshotRepo) ListForUser(_ context.Context, userID uuid.UUID) ([]*entity.LifeSnapshot, error) {
+	var out []*entity.LifeSnapshot
+	for _, s := range r.rows {
+		if s.UserID == userID {
+			out = append(out, s)
+		}
+	}
+	return out, nil
+}
+
 func TestCreate_PersistsSnapshot(t *testing.T) {
 	ctx := context.Background()
 	repo := &fakeSnapshotRepo{}

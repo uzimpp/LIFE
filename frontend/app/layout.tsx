@@ -3,6 +3,8 @@ import { Lora, Host_Grotesk } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { ChromeGate } from "@/components/layout/ChromeGate";
+import ScrollTriggerRefresh from "@/components/ScrollTriggerRefresh";
 import { Toaster } from "sonner";
 
 const lora = Lora({
@@ -34,9 +36,14 @@ export default function RootLayout({
       <body
         className={`${lora.variable} ${hostGrotesk.variable} antialiased`}
       >
-        <Navbar />
+        <ScrollTriggerRefresh />
+        <ChromeGate>
+          <Navbar />
+        </ChromeGate>
         {children}
-        <Footer />
+        <ChromeGate>
+          <Footer />
+        </ChromeGate>
         <Toaster
           position="bottom-right"
           toastOptions={{

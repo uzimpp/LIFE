@@ -36,6 +36,16 @@ func (r *inMemorySnapshotRepo) GetLatest(_ context.Context, userID uuid.UUID) (*
 	return nil, nil
 }
 
+func (r *inMemorySnapshotRepo) ListForUser(_ context.Context, userID uuid.UUID) ([]*entity.LifeSnapshot, error) {
+	var out []*entity.LifeSnapshot
+	for _, s := range r.rows {
+		if s.UserID == userID {
+			out = append(out, s)
+		}
+	}
+	return out, nil
+}
+
 func ctxWithUser(u *entity.User) context.Context {
 	return context.WithValue(context.Background(), middleware.UserContextKey, u)
 }

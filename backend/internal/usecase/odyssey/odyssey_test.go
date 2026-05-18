@@ -36,6 +36,16 @@ func (r *fakeOdysseyRepo) GetLatestForUser(_ context.Context, userID uuid.UUID) 
 	return nil, nil
 }
 
+func (r *fakeOdysseyRepo) ListForUser(_ context.Context, userID uuid.UUID) ([]*entity.OdysseyPlan, error) {
+	var out []*entity.OdysseyPlan
+	for _, p := range r.plans {
+		if p.UserID == userID {
+			out = append(out, p)
+		}
+	}
+	return out, nil
+}
+
 func (r *fakeOdysseyRepo) UpdatePath(_ context.Context, path *entity.OdysseyPath) error {
 	for _, plan := range r.plans {
 		for i := range plan.Paths {

@@ -5,35 +5,9 @@ import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import MethodologyTeaser from "@/components/MethodologyTeaser";
+import SlideUpText from "@/components/SlideUpText";
 
 gsap.registerPlugin(ScrollTrigger);
-
-// ─── Split text — renders chars without auto-animating ────────────────────────
-
-function SplitText({
-  text,
-  className = "",
-}: {
-  text: string;
-  className?: string;
-}) {
-  return (
-    <span className={`inline-flex flex-wrap ${className}`} aria-label={text}>
-      {text.split("").map((char, i) => (
-        // No clipping wrapper — reveal is opacity-driven (see entry tweens), so
-        // the glyph always renders fully and Lora's descenders / serif
-        // overshoots are never cropped, neither during nor after the animation.
-        <span
-          key={i}
-          className="gsap-char inline-block"
-          style={{ lineHeight: "inherit" }}
-        >
-          {char === " " ? " " : char}
-        </span>
-      ))}
-    </span>
-  );
-}
 
 // ─── Life word — each char gets its own overflow-hidden wrapper for the
 // yPercent slide animation (entry, and the i/f/e → I/F/E flip).
@@ -111,6 +85,124 @@ function MarqueeStrip() {
   );
 }
 
+// ─── About the project — per-word slide-up + opacity scrub on scroll ────────
+
+const ABOUT_PARAGRAPH =
+  "This is a quiet workspace for the in-between — not a coach, not a planner, not another productivity tool. It is a method for the version of you that has stopped asking what comes next and started asking why. Three small exercises, taken slowly, return that question to its proper size.";
+
+function AboutProject() {
+  const ref = useRef<HTMLElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const ctx = gsap.context(() => {
+      const words = ref.current!.querySelectorAll<HTMLElement>(".reveal-word");
+
+      // Scrub-driven rise + bloom. Using a scrubbed timeline with fromTo
+      // (instead of gsap.set + gsap.to) keeps the from/to values bound to
+      // the tween itself, so they survive ScrollTrigger.refresh() and the
+      // strict-mode double-invoke cleanup cycle without losing state.
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: ref.current,
+            start: "top 80%",
+            end: "bottom 60%",
+            scrub: 0.8,
+          },
+        })
+        .fromTo(
+          words,
+          { yPercent: 110, opacity: 0.12 },
+          {
+            yPercent: 0,
+            opacity: 1,
+            ease: "power2.out",
+            stagger: 0.06,
+          },
+        );
+
+      if (eyebrowRef.current) {
+        gsap.fromTo(
+          eyebrowRef.current,
+          { opacity: 0, y: 18 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.95,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: ref.current,
+              start: "top 82%",
+              once: true,
+            },
+          },
+        );
+      }
+    }, ref);
+
+    return () => ctx.revert();
+  }, []);
+
+  const words = ABOUT_PARAGRAPH.split(" ");
+
+  return (
+    <section
+      ref={ref}
+      className="relative px-6 md:px-12 py-32 md:py-48 border-t border-border"
+    >
+      <div className="max-w-5xl mx-auto">
+        <div
+          ref={eyebrowRef}
+          className="mb-12 md:mb-16 flex items-center gap-5 opacity-0"
+        >
+          <span aria-hidden className="h-px w-12 bg-border" />
+          <span className="text-xs uppercase tracking-[0.32em] font-medium text-muted">
+            What this is
+          </span>
+        </div>
+
+        <p
+          className="title text-fg"
+          style={{
+            fontSize: "clamp(1.85rem, 4vw, 3.25rem)",
+            lineHeight: 1.2,
+            letterSpacing: "-0.025em",
+          }}
+          aria-label={ABOUT_PARAGRAPH}
+        >
+          {words.map((word, i) => (
+            <span key={i}>
+              <span
+                className="overflow-hidden inline-block align-baseline"
+                style={{
+                  lineHeight: "inherit",
+                  // Extend the clip-box above/below so serif ascenders and
+                  // descenders aren't truncated mid-tween. Matching negative
+                  // margins preserve surrounding layout.
+                  paddingTop: "0.3em",
+                  marginTop: "-0.3em",
+                  paddingBottom: "0.25em",
+                  marginBottom: "-0.25em",
+                }}
+              >
+                <span
+                  className="reveal-word inline-block"
+                  style={{ lineHeight: "inherit", willChange: "transform" }}
+                >
+                  {word}
+                </span>
+              </span>
+              {i < words.length - 1 ? " " : ""}
+            </span>
+          ))}
+        </p>
+      </div>
+    </section>
+  );
+}
+
 // ─── Method movements — editorial plaques, alternating zig-zag w/ drawn line
 
 const METHOD_STEPS = [
@@ -168,6 +260,7 @@ function MethodMovements() {
             start: "top 70%",
             end: "bottom 60%",
             scrub: 0.6,
+            invalidateOnRefresh: true,
           },
         });
       }
@@ -179,18 +272,6 @@ function MethodMovements() {
   return (
     <section ref={sectionRef} className="relative px-6 md:px-12 py-24 md:py-32">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="h-px flex-1 bg-border" />
-          <span className="text-xs uppercase tracking-[0.25em] font-medium text-muted">
-            The intended flow
-          </span>
-          <div className="h-px flex-1 bg-border" />
-        </div>
-
-        <h2 className="title-tight text-fg text-4xl md:text-5xl leading-[0.96] max-w-3xl mb-16 md:mb-20">
-          Three movements, in the order they were meant to be taken.
-        </h2>
-
         <svg
           aria-hidden
           viewBox="0 0 1000 900"
@@ -254,6 +335,11 @@ function FinalCTA() {
   useEffect(() => {
     if (!ref.current) return;
     const ctx = gsap.context(() => {
+      const chars =
+        ref.current!.querySelectorAll<HTMLElement>(".slide-up-char");
+
+      gsap.set(chars, { yPercent: 140, opacity: 1 });
+
       gsap.fromTo(
         ref.current,
         { opacity: 0, y: 30 },
@@ -266,6 +352,15 @@ function FinalCTA() {
             trigger: ref.current,
             start: "top 80%",
             once: true,
+            onEnter: () => {
+              gsap.to(chars, {
+                yPercent: 0,
+                duration: 0.85,
+                ease: "power4.out",
+                stagger: 0.025,
+                delay: 0.1,
+              });
+            },
           },
         },
       );
@@ -286,9 +381,9 @@ function FinalCTA() {
         </div>
 
         <h2 className="title-tight text-fg text-[clamp(2.75rem,7vw,6.5rem)] leading-[0.94]">
-          Three sketches.
+          <SlideUpText text="Three sketches." />
           <br />
-          <em className="text-fg/80">Begin yours.</em>
+          <SlideUpText text="Begin yours." italic className="text-fg/80" />
         </h2>
 
         <p className="text-base md:text-md text-muted max-w-xl mx-auto leading-8">
@@ -349,13 +444,13 @@ export default function Home() {
     // from the original DOM/style state, not a half-animated one.
     const ctx = gsap.context(() => {
       const chars1 = Array.from(
-        line1Ref.current?.querySelectorAll<HTMLElement>(".gsap-char") ?? [],
+        line1Ref.current?.querySelectorAll<HTMLElement>(".slide-up-char") ?? [],
       );
       const charsLife = Array.from(
         lifeRef.current?.querySelectorAll<HTMLElement>(".gsap-char") ?? [],
       );
       const chars2 = Array.from(
-        line2Ref.current?.querySelectorAll<HTMLElement>(".gsap-char") ?? [],
+        line2Ref.current?.querySelectorAll<HTMLElement>(".slide-up-char") ?? [],
       );
 
       // Timing summary:
@@ -369,19 +464,20 @@ export default function Home() {
       const tl = gsap.timeline();
 
       // Phase 1: "Unsure about" + "Life" enter
-      // SplitText chars use opacity + small yPercent so no clipping is needed
-      // (descenders/overshoots always render). LIFE keeps the bigger yPercent:110
-      // slide because LifeWord still uses its overflow-hidden wrappers (no
-      // descenders on L/I/F/E to worry about).
+      // chars1 uses the SlideUpText per-char overflow-hidden + yPercent
+      // pattern (same as "Built on / Designing Your Life"). fromTo applies
+      // the from-state right at t=0.3, snapping the chars to yPercent: 140
+      // + opacity: 1 (off-screen via overflow-hidden, invisible) then
+      // slides them up. Before t=0.3 the chars are at SlideUpText's
+      // render-time opacity: 0 so nothing flashes.
       tl.fromTo(
         chars1,
-        { opacity: 0, yPercent: 25 },
+        { yPercent: 140, opacity: 1 },
         {
-          opacity: 1,
           yPercent: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          stagger: 0.02,
+          duration: 0.85,
+          ease: "power4.out",
+          stagger: 0.04,
         },
         0.3,
       );
@@ -403,13 +499,12 @@ export default function Home() {
       );
       tl.fromTo(
         chars2,
-        { opacity: 0, yPercent: 25 },
+        { yPercent: 140, opacity: 1 },
         {
-          opacity: 1,
           yPercent: 0,
-          duration: 0.9,
-          ease: "power3.out",
-          stagger: 0.015,
+          duration: 0.85,
+          ease: "power4.out",
+          stagger: 0.04,
         },
         1.6,
       );
@@ -425,7 +520,7 @@ export default function Home() {
       [1, 2, 3].forEach((charIdx, i) => {
         const char = charsLife[charIdx];
         const upper = upperMap[i];
-        const t = 1.9 + i * 0.07;
+        const t = 2.05 + i * 0.04;
 
         // Char exits upward (clipped by overflow-hidden — clean disappear)
         tl.to(
@@ -484,9 +579,9 @@ export default function Home() {
               pin to its actual top and bottom. Reads as "Unsure about Life" / "Figured out at Life". */}
           <h1 className="grid grid-cols-[auto_auto] justify-start gap-x-[clamp(0.5rem,2vw,1.5rem)] mb-14 leading-none w-fit">
             <div ref={line1Ref} className="col-start-1 row-start-1 self-start">
-              <SplitText
+              <SlideUpText
                 text="Unsure about"
-                className="text-headline text-fg translate-y-2"
+                className="text-headline text-fg -translate-y-[clamp(0rem,3vw,0.25rem)]"
               />
             </div>
 
@@ -498,9 +593,9 @@ export default function Home() {
             </div>
 
             <div ref={line2Ref} className="col-start-1 row-start-2 self-end">
-              <SplitText
+              <SlideUpText
                 text="Figured out at"
-                className="text-headline text-fg -translate-y-2"
+                className="text-headline text-fg -translate-y-[clamp(0rem,3vw,0.25rem)]"
               />
             </div>
           </h1>
@@ -555,6 +650,9 @@ export default function Home() {
 
       {/* ── Marquee ───────────────────────────────────────────────── */}
       <MarqueeStrip />
+
+      {/* ── About the project ─────────────────────────────────────── */}
+      <AboutProject />
 
       {/* ── Method movements ──────────────────────────────────────── */}
       <MethodMovements />

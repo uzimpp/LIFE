@@ -1,11 +1,12 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-type Width = "prose" | "wide";
+type Width = "prose" | "wide" | "dashboard";
 
 const widthClass: Record<Width, string> = {
   prose: "max-w-2xl",
   wide:  "max-w-5xl",
+  dashboard: "max-w-6xl",
 };
 
 export function PageShell({

@@ -62,6 +62,26 @@
   animation: marquee 56s linear infinite;
 }
 
+/* ── Vignette breath — slow ambient opacity for auth card ─────── */
+@keyframes vignette-breath {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+.animate-vignette-breath {
+  animation: vignette-breath 14s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-vignette-breath {
+    animation: none;
+    opacity: 0.65;
+  }
+}
+
 /* ── Base ──────────────────────────────────────────────────────── */
 body {
   background-color: var(--color-bg);
@@ -108,12 +128,23 @@ body {
 }
 
 /* Section headlines — "Unsure about" / "Figured out at" / page titles.
-   Same breakpoints as .text-display: pinned at 0.5rem <=375px, 5.5rem >=1440px. */
+   Pinned: 1.9rem @ 375px viewport, 6.6rem @ 1440px viewport.
+   Linear slope solved for both endpoints: 0.245rem + 7.06vw. */
 .text-headline {
   font-family: var(--font-title), Georgia, serif;
   font-weight: 400;
   letter-spacing: -0.05em;
-  font-size: clamp(1.9rem, calc(0.63rem + 5.41vw), 5.5rem);
+  font-size: clamp(1.9rem, calc(0.245rem + 7.06vw), 6.6rem);
+}
+
+/* Subhead — smaller than .text-headline. Card titles, sub-section anchors.
+   Pinned: 1.4rem @ 375px viewport, 3rem @ 1440px viewport.
+   Linear slope solved for both endpoints: 0.84rem + 2.4vw. */
+.text-subheadline {
+  font-family: var(--font-title), Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  font-size: clamp(1.4rem, calc(0.84rem + 2.4vw), 3rem);
 }
 
 /* Feature display — between .text-headline and .text-display.

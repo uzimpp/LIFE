@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SlideUpText from "@/components/SlideUpText";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -12,16 +13,38 @@ export default function MethodologyTeaser() {
 
   useEffect(() => {
     if (!ref.current) return;
-    const tween = gsap.to(ref.current, {
-      opacity: 1,
-      duration: 0.9,
-      ease: "power3.out",
-      scrollTrigger: { trigger: ref.current, start: "top 80%", once: true },
-    });
-    return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
-    };
+    const ctx = gsap.context(() => {
+      const chars = ref.current!.querySelectorAll<HTMLElement>(
+        ".slide-up-char",
+      );
+      // Take ownership of the chars: bring opacity back to 1 (they ship
+      // with opacity: 0 from render) and translate them down past the
+      // overflow-hidden clip box. They stay invisible until the tween
+      // slides them up. Setting both in one gsap.set ensures the chars
+      // are never seen at yPercent: 0 with opacity: 1.
+      gsap.set(chars, { yPercent: 140, opacity: 1 });
+
+      gsap.to(ref.current, {
+        opacity: 1,
+        duration: 0.9,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ref.current,
+          start: "top 85%",
+          once: true,
+          onEnter: () => {
+            gsap.to(chars, {
+              yPercent: 0,
+              duration: 0.85,
+              ease: "power4.out",
+              stagger: 0.025,
+              delay: 0.1,
+            });
+          },
+        },
+      });
+    }, ref);
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -32,9 +55,9 @@ export default function MethodologyTeaser() {
             The source
           </p>
           <h2 className="text-feature text-fg">
-            <span className="text-nowrap">Built on</span>
+            <SlideUpText text="Built on" className="whitespace-nowrap" />
             <br />
-            <em>Designing Your Life</em>
+            <SlideUpText text="Designing Your Life" italic />
           </h2>
         </div>
 
