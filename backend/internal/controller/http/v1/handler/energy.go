@@ -62,7 +62,7 @@ func (h *EnergyHandler) Log(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]any{"success": true, "data": energyPayload(e)})
+	_ = json.NewEncoder(w).Encode(map[string]any{"success": true, "data": energyPayload(e)})
 }
 
 func (h *EnergyHandler) List(w http.ResponseWriter, r *http.Request) {

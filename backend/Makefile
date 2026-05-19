@@ -39,7 +39,7 @@ docker-rm-volume: ## remove docker volume
 bin-deps: ## install tools
 	go install github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 	go install github.com/swaggo/swag/cmd/swag@latest
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.1.6
 	go install github.com/air-verse/air@latest
 
 clean:
